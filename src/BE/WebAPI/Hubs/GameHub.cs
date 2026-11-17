@@ -7,6 +7,7 @@ using MongoDB.Bson;
 using SirLocked.Api.DataAccess;
 using SirLocked.Api.Models;
 using SirLocked.Api.Services;
+using SirLocked.Api.Services.Market;
 
 namespace SirLocked.Api.WebAPI.Hubs;
 
@@ -16,15 +17,21 @@ public class GameHub : Hub
     private static readonly RoomPresenceTracker Presence = new();
     private static readonly ConcurrentDictionary<string, long> LastPoseTicks = new();
     private static readonly TimeSpan PoseInterval = TimeSpan.FromMilliseconds(50);
+    private static readonly HashSet<string> PixelFacings = new(StringComparer.Ordinal)
+    {
+        "south", "south-east", "east", "north-east", "north", "north-west", "west", "south-west"
+    };
     private readonly MongoDbContext _db;
     private readonly RoomDisconnectTimeoutService _disconnectTimeout;
+    private readonly LobbyEntranceService _entrances;
     private readonly ILogger<GameHub> _logger;
     private static readonly CooperativePingPolicy PingPolicy = new();
 
-    public GameHub(MongoDbContext db, RoomDisconnectTimeoutService disconnectTimeout, ILogger<GameHub> logger)
+    public GameHub(MongoDbContext db, RoomDisconnectTimeoutService disconnectTimeout, LobbyEntranceService entrances, ILogger<GameHub> logger)
     {
         _db = db;
         _disconnectTimeout = disconnectTimeout;
+        _entrances = entrances;
         _logger = logger;
     }
 
@@ -78,6 +85,16 @@ public class GameHub : Hub
             roomId,
             version = room.GameplayState?.Version ?? 0
         });
+        try
+        {
+            // After joining the group, so the arriving player sees their own entrance too.
+            await _entrances.AnnounceAsync(roomId, userId!, Context.ConnectionAborted);
+        }
+        catch (Exception error) when (error is not OperationCanceledException)
+        {
+            // Cosmetic only: a player must still get into the room.
+            _logger.LogWarning(error, "Could not announce the entrance of {UserId} in room {RoomId}.", userId, roomId);
+        }
     }
 
     public async Task LeaveRoom(string roomId)
@@ -129,6 +146,8 @@ public class GameHub : Hub
         var x = Math.Clamp(pose.X, 0, 5000);
         var y = Math.Clamp(pose.Y, 0, 5000);
         var direction = string.Equals(pose.Direction, "left", StringComparison.OrdinalIgnoreCase) ? "left" : "right";
+        // Pixel scenes animate eight facings; anything else is dropped so clients fall back to direction.
+        var facing = pose.Facing is { } requested && PixelFacings.Contains(requested) ? requested : null;
 
         await Clients.OthersInGroup(RoomGroup(roomId)).SendAsync("PlayerPoseUpdated", new
         {
@@ -140,6 +159,7 @@ public class GameHub : Hub
             x,
             y,
             direction,
+            facing,
             moving = pose.Moving,
             updatedAt = DateTime.UtcNow
         });
@@ -253,5 +273,7 @@ public class PlayerPoseMessage
     public double X { get; set; }
     public double Y { get; set; }
     public string Direction { get; set; } = "right";
+    /// <summary>Optional eight-way facing used by pixel scenes (south, south-east, east, ...).</summary>
+    public string? Facing { get; set; }
     public bool Moving { get; set; }
 }
