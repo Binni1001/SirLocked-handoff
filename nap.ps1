@@ -48,7 +48,7 @@ Invoke-Git pull --ff-only origin develop
 
 if ((GitOut rev-parse 'HEAD^{tree}') -ne (GitOut rev-parse "handoff/$Prev^{tree}")) {
   Write-Host "DUNG LAI: develop chua khop voi phan truoc ($Prev)."
-  Write-Host 'Doi Khoa merge PR cua nguoi truoc vao develop roi chay lai.'
+  Write-Host 'Nhac nguoi truoc tu merge PR cua ho vao develop roi chay lai.'
   exit 1
 }
 
@@ -66,3 +66,4 @@ Write-Host "OK: nhanh $Branch khop dung phan $Slice."
 if ($Push) { Invoke-Git push -u origin $Branch }
 else { Write-Host "Kiem tra xong thi day len: git push -u origin $Branch" }
 Write-Host "Mo PR vao develop: https://github.com/$FinalRepo/compare/develop...$($Branch)?expand=1"
+Write-Host "Sau do tu merge PR (Create a merge commit) va bao nguoi tiep theo."

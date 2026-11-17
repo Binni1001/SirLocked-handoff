@@ -54,7 +54,7 @@ git pull --ff-only origin develop
 
 if [[ "$(git rev-parse 'HEAD^{tree}')" != "$(git rev-parse "handoff/$PREV^{tree}")" ]]; then
   echo "DUNG LAI: develop chua khop voi phan truoc ($PREV)."
-  echo "Doi Khoa merge PR cua nguoi truoc vao develop roi chay lai."
+  echo "Nhac nguoi truoc tu merge PR cua ho vao develop roi chay lai."
   exit 1
 fi
 
@@ -75,3 +75,4 @@ else
   echo "Kiem tra xong thi day len: git push -u origin $BRANCH"
 fi
 echo "Mo PR vao develop: https://github.com/${FINAL_REPO}/compare/develop...${BRANCH}?expand=1"
+echo "Sau do tu merge PR (Create a merge commit) va bao nguoi tiep theo."

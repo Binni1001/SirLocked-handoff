@@ -1,6 +1,6 @@
 # SirLocked: nạp code vào repo cuối kỳ (phase 3)
 
-Repo này chỉ dùng để chuyển code. Nó chứa sẵn **12 phần code** (3 ngày × 4 người). Mỗi người lần lượt đưa phần của mình vào repo cuối kỳ [`tranhuuanhkhoa/SirLocked`](https://github.com/tranhuuanhkhoa/SirLocked), commit bằng tài khoản của mình rồi mở PR vào `develop`. **Khoa** là người merge.
+Repo này chỉ dùng để chuyển code. Nó chứa sẵn **12 phần code** (3 ngày × 4 người). Mỗi người lần lượt đưa phần của mình vào repo cuối kỳ [`tranhuuanhkhoa/SirLocked`](https://github.com/tranhuuanhkhoa/SirLocked), commit bằng tài khoản của mình, mở PR vào `develop` rồi **tự merge PR đó**. **Khoa** làm cuối mỗi ngày, merge phần của mình rồi merge `develop` vào `main`.
 
 - **Gốc:** `develop` hiện tại của repo cuối kỳ (PR #32, 14/10/2026). Repo này giữ bản đó ở nhánh `base`.
 - **Đích:** sau phần cuối cùng, `develop` giống hệt bản đầy đủ mới nhất (nhánh làm việc `feat/claude-vu-an`, 17/11/2026), không thừa không thiếu một file.
@@ -8,7 +8,10 @@ Repo này chỉ dùng để chuyển code. Nó chứa sẵn **12 phần code** (
 
 ## Lịch nạp
 
-Thứ tự mỗi ngày: **Kiệt → Cầu → Hoàng → Khoa**. Người sau chỉ bắt đầu khi PR của người trước **đã được merge**.
+Thứ tự mỗi ngày: **Kiệt → Cầu → Hoàng → Khoa**. Người sau chỉ bắt đầu khi người trước **đã tự merge PR của mình** vào `develop`.
+
+Tiến độ:
+- Ngày 1, Kiệt: đã xong ([PR #33](https://github.com/tranhuuanhkhoa/SirLocked/pull/33)).
 
 ### Ngày 1 (17/11/2026): foundation, case board UI and economy
 | # | Người | Nhánh tạo trong repo cuối kỳ | File | Dòng (+/−) |
@@ -82,25 +85,45 @@ Script tự làm những việc sau:
 
 Nếu muốn xem trước khi đẩy, bỏ `-Push` / `--push`. Script sẽ in sẵn lệnh `git push` để chạy sau.
 
-**Bước 2: mở PR.** Script in ra link dạng `https://github.com/tranhuuanhkhoa/SirLocked/compare/develop...<nhanh>?expand=1`.
-- Base là `develop`.
-- Tiêu đề giữ nguyên message commit.
-- Gán Khoa làm reviewer.
+**Bước 2: mở PR.** Script in ra link dạng `https://github.com/tranhuuanhkhoa/SirLocked/compare/develop...<nhanh>?expand=1`. Base là `develop`, tiêu đề giữ nguyên message commit.
 
-**Bước 3: báo nhóm** đã mở PR, rồi chờ Khoa merge. Người tiếp theo chỉ chạy script sau khi PR đã merge.
+Nếu máy có [GitHub CLI](https://cli.github.com/), có thể mở PR bằng lệnh (thay `<nhanh>` bằng tên nhánh script vừa in):
+```bash
+gh pr create --repo tranhuuanhkhoa/SirLocked --base develop --head <nhanh> --fill
+```
 
-## Việc của Khoa (merge)
+**Bước 3: tự merge PR của mình.** Trên trang PR, bấm **Merge pull request** và chọn **Create a merge commit**. Không chọn Squash hay Rebase. Nếu dùng GitHub CLI:
+```bash
+gh pr merge <so-PR> --repo tranhuuanhkhoa/SirLocked --merge
+```
+Merge xong thì **báo người tiếp theo** trong nhóm.
 
-- Merge từng PR **theo đúng thứ tự** Kiệt → Cầu → Hoàng → Khoa, mỗi lần một PR, chọn **Create a merge commit**.
-- Phần của Khoa là phần cuối mỗi ngày: Khoa tự mở PR rồi tự merge.
 - **CI có thể đỏ ở các PR giữa chừng.** Code đầy đủ được chia nhỏ theo file, nên khi mới có một phần thì backend hoặc frontend có thể chưa build được. Cứ merge theo thứ tự. Sau phần cuối ngày 3, `develop` có đủ code và CI phải xanh trở lại.
 - Không sửa thêm gì trên `develop` trong 3 ngày này. Nếu sửa, script của người sau sẽ báo "develop chưa khớp".
+
+## Việc riêng của Khoa: đưa `develop` vào `main`
+
+Khoa là người cuối mỗi ngày. Sau khi tự merge PR của mình vào `develop`:
+
+1. **Kiểm tra `develop` đã đủ 4 phần của ngày.** Chạy trong thư mục `SirLocked`, thay `day-01-4-khoa` bằng `day-02-4-khoa` hoặc `day-03-4-khoa` cho ngày 2 và ngày 3:
+   ```bash
+   git fetch origin develop
+   git fetch handoff day-01-4-khoa
+   git diff --stat origin/develop handoff/day-01-4-khoa
+   ```
+   Lệnh **không in ra gì** nghĩa là đủ. Nếu lệnh liệt kê file thì còn PR của ai đó chưa merge: **dừng lại, chưa merge vào `main`**.
+2. Mở PR từ `develop` vào `main`, tiêu đề ví dụ `phase3-day-01: merge develop into main`, rồi merge bằng **Create a merge commit**. Với GitHub CLI:
+   ```bash
+   gh pr create --repo tranhuuanhkhoa/SirLocked --base main --head develop --title "phase3-day-01: merge develop into main" --body "Ngay 1 phase 3: du 4 phan Kiet, Cau, Hoang, Khoa."
+   gh pr merge <so-PR> --repo tranhuuanhkhoa/SirLocked --merge
+   ```
+3. Báo nhóm ngày đó đã xong.
 
 ## Khi gặp lỗi
 
 | Thông báo | Nghĩa là | Cách xử lý |
 |---|---|---|
-| `DUNG LAI: develop chua khop voi phan truoc` | PR của người trước chưa được merge, hoặc ai đó đã sửa `develop` | Chờ Khoa merge rồi chạy lại. Nếu đã merge rồi mà vẫn lỗi, báo Kiệt |
+| `DUNG LAI: develop chua khop voi phan truoc` | Người trước chưa merge PR của mình, hoặc ai đó đã sửa `develop` | Nhắc người trước merge rồi chạy lại. Nếu đã merge rồi mà vẫn lỗi, báo Kiệt |
 | `Thu muc dang co thay doi chua commit` | Repo trên máy đang có file sửa dở | Commit, hoặc bỏ thay đổi đó (`git stash push -m tam`), rồi chạy lại |
 | `Filename too long` | Chưa bật longpaths | Chạy `git config --global core.longpaths true`, xóa thư mục clone rồi clone lại |
 | `fatal: a branch named ... already exists` | Đã chạy script cho lượt này rồi | Nếu chưa push: `git checkout develop` rồi `git branch -D <nhanh>` và chạy lại. Nếu đã push: chỉ cần mở PR |
