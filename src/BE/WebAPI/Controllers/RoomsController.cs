@@ -16,11 +16,16 @@ public class RoomsController : BaseApiController
 
     [HttpPost]
     public async Task<ActionResult<ApiResponse<RoomResponse>>> Create([FromBody] CreateRoomRequest request) =>
-        Ok(await _roomService.CreateAsync(Caller, request.CaseId), "Room created.");
+        Ok(await _roomService.CreateAsync(Caller, request.CaseId, request.Visibility), "Room created.");
+
+    /// <summary>Waiting public rooms with a free seat plus public games in progress.</summary>
+    [HttpGet("public")]
+    public async Task<ActionResult<ApiResponse<List<PublicRoomResponse>>>> Public([FromQuery] PublicRoomQuery query, CancellationToken cancellationToken) =>
+        Ok(await _roomService.ListPublicAsync(CallerId, query, cancellationToken));
 
     [HttpPost("join")]
     public async Task<ActionResult<ApiResponse<RoomResponse>>> Join([FromBody] JoinRoomRequest request) =>
-        Ok(await _roomService.JoinAsync(Caller, request.RoomCode), "Joined room.");
+        Ok(await _roomService.JoinAsync(Caller, request.RoomCode, request.InviteToken), "Joined room.");
 
     [HttpGet("mine")]
     public async Task<ActionResult<ApiResponse<List<RoomResponse>>>> Mine(CancellationToken cancellationToken) =>
