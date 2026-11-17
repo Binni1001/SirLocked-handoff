@@ -1,4 +1,5 @@
 import { session } from './session.js';
+import { navigate } from './navigation.js';
 
 const REFRESH_LOCK = 'sirlocked.auth-refresh';
 const pendingRefreshes = new Map();
@@ -23,13 +24,14 @@ function hasNewerSession(original) {
 
 export function expireSessionIfCurrent(original) {
   if (!original.token || !sameSession(original, authSnapshot())) return;
+  const signIn = session.loginAddress();
   session.clear();
-  window.location.hash = '#/login';
+  navigate(signIn);
 }
 
 export function isPublicAuthRequest(path) {
   const pathname = String(path).split('?')[0];
-  return /^\/api\/auth\/(login|register|refresh|forgot-password|reset-password|verify-email|google(?:\/callback)?)\/?$/.test(pathname);
+  return /^\/api\/auth\/(login|admin\/login|register|refresh|forgot-password|reset-password|verify-email|google(?:\/callback)?)\/?$/.test(pathname);
 }
 
 export function refreshAfterUnauthorized(original) {

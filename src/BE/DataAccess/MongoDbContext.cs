@@ -7,7 +7,7 @@ using SirLocked.Api.Models;
 
 namespace SirLocked.Api.DataAccess;
 
-public class MongoDbContext
+public partial class MongoDbContext
 {
     public const string PlaytestSessionTimestampIndexName = "ix_playtestEvents_session_timestamp";
     public const string PlaytestTypeTimestampIndexName = "ix_playtestEvents_type_timestamp";
@@ -53,7 +53,6 @@ public class MongoDbContext
     public IMongoCollection<GameActionLog> ActionLogs => Database.GetCollection<GameActionLog>(Settings.ActionLogsCollectionName);
     public IMongoCollection<AiCaseDraft> AiCaseDrafts => Database.GetCollection<AiCaseDraft>(Settings.AiCaseDraftsCollectionName);
     public IMongoCollection<AiGenerationLog> AiGenerationLogs => Database.GetCollection<AiGenerationLog>(Settings.AiGenerationLogsCollectionName);
-    public IMongoCollection<AiBudgetLedger> AiBudgetLedger => Database.GetCollection<AiBudgetLedger>("aiBudgetLedger");
     public IMongoCollection<EvidencePhoto> EvidencePhotos => Database.GetCollection<EvidencePhoto>(Settings.EvidencePhotosCollectionName);
     public IMongoCollection<CaseReview> Reviews => Database.GetCollection<CaseReview>(Settings.ReviewsCollectionName);
     public IMongoCollection<WeeklyFeature> WeeklyFeatures => Database.GetCollection<WeeklyFeature>(Settings.WeeklyFeaturesCollectionName);
@@ -148,6 +147,21 @@ public class MongoDbContext
                         Builders<AiCaseDraft>.Filter.Gt(d => d.ActiveQuotaKey, string.Empty))
                 })
             ,new CreateIndexModel<AiCaseDraft>(
+                Builders<AiCaseDraft>.IndexKeys.Ascending(d => d.WeeklyQuotaKey),
+                new CreateIndexOptions<AiCaseDraft>
+                {
+                    Name = "ux_aiCaseDrafts_weeklyQuotaKey",
+                    Unique = true,
+                    PartialFilterExpression = Builders<AiCaseDraft>.Filter.And(
+                        Builders<AiCaseDraft>.Filter.Type(d => d.WeeklyQuotaKey, BsonType.String),
+                        Builders<AiCaseDraft>.Filter.Gt(d => d.WeeklyQuotaKey, string.Empty))
+                })
+            ,new CreateIndexModel<AiCaseDraft>(
+                Builders<AiCaseDraft>.IndexKeys
+                    .Ascending(d => d.QueueState)
+                    .Ascending(d => d.ClaudeWait!.RequestId),
+                new CreateIndexOptions { Name = "ix_aiCaseDrafts_queueState_claudeWaitRequest" })
+            ,new CreateIndexModel<AiCaseDraft>(
                 Builders<AiCaseDraft>.IndexKeys.Ascending(d => d.DailyQuotaKey),
                 new CreateIndexOptions<AiCaseDraft>
                 {
@@ -165,15 +179,8 @@ public class MongoDbContext
                 .Ascending(l => l.DraftId).Descending(l => l.CreatedAt))
         }, ct);
 
-        await Database.GetCollection<AiUsageEvent>("aiUsageEvents").Indexes.CreateManyAsync(new[]
-        {
-            new CreateIndexModel<AiUsageEvent>(Builders<AiUsageEvent>.IndexKeys
-                .Ascending(item => item.State).Ascending(item => item.UpdatedAt),
-                new CreateIndexOptions { Name = "ix_aiUsageEvents_state_updatedAt" }),
-            new CreateIndexModel<AiUsageEvent>(Builders<AiUsageEvent>.IndexKeys
-                .Ascending(item => item.Lease.DraftId).Ascending(item => item.State).Ascending(item => item.UpdatedAt),
-                new CreateIndexOptions { Name = "ix_aiUsageEvents_draft_state_updatedAt" })
-        }, ct);
+        // The retired USD ledger (aiUsageEvents, aiBudgetLedger) keeps its data but is no longer read or written.
+        await EnsureBridgeIndexesAsync(ct);
 
         await EvidencePhotos.Indexes.CreateOneAsync(
             new CreateIndexModel<EvidencePhoto>(
@@ -200,6 +207,7 @@ public class MongoDbContext
                 new CreateIndexOptions { Name = "ix_weeklyFeatures_type_isActive" }),
             cancellationToken: ct);
 
+        await EnsureLobbyIndexesAsync(ct);
         await EnsurePlaytestEventIndexesAsync(ct);
     }
 

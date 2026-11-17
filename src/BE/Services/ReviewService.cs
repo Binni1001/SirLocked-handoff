@@ -14,11 +14,25 @@ public class ReviewService : IReviewService
     public const int MaxPageSize = 50;
 
     private readonly MongoDbContext _db;
+    private readonly LegacyCaseCatalog? _legacy;
 
-    public ReviewService(MongoDbContext db) => _db = db;
+    public ReviewService(MongoDbContext db, LegacyCaseCatalog? legacy = null)
+    {
+        _db = db;
+        _legacy = legacy;
+    }
+
+    private async Task<bool> IsHiddenAsync(string caseId) => _legacy is not null && await _legacy.IsHiddenAsync(caseId);
+
+    private async Task EnsureVisibleAsync(string caseId)
+    {
+        // Reviews of a hidden (legacy) case are kept in the database but cannot be read or written any more.
+        if (await IsHiddenAsync(caseId)) throw ApiException.NotFound("Case not found.");
+    }
 
     public async Task<ReviewEligibilityDto> CheckEligibilityAsync(CurrentUser user, string caseId, CancellationToken ct = default)
     {
+        await EnsureVisibleAsync(caseId);
         var hasPlayed = await HasPlayedAsync(user.Id, caseId, ct);
         var isAuthor = await IsAuthorAsync(user.Id, caseId, ct);
         var existing = await FindReviewAsync(user.Id, caseId, ct);
@@ -35,6 +49,7 @@ public class ReviewService : IReviewService
 
     public async Task<ReviewDto> SubmitReviewAsync(CurrentUser user, string caseId, SubmitReviewDto dto, CancellationToken ct = default)
     {
+        await EnsureVisibleAsync(caseId);
         // Validate the payload server-side; never trust the client.
         var rating = ReviewRules.ValidateRating(dto.Rating);
         var difficulty = ReviewRules.ValidateSubRating(dto.Difficulty, "Difficulty");
@@ -75,7 +90,12 @@ public class ReviewService : IReviewService
         page = page < 1 ? 1 : page;
         pageSize = pageSize < 1 ? DefaultPageSize : Math.Min(pageSize, MaxPageSize);
 
-        var filter = Builders<CaseReview>.Filter.Eq(r => r.CaseId, caseId);
+        if (await IsHiddenAsync(caseId))
+        {
+            return new ReviewPageDto { Items = [], Page = page, PageSize = pageSize, Total = 0, HasMore = false };
+        }
+
+        var filter = VisibleFilter(caseId);
         var total = await _db.Reviews.CountDocumentsAsync(filter, cancellationToken: ct);
         var items = await _db.Reviews.Find(filter)
             .SortByDescending(r => r.CreatedAt)
@@ -95,8 +115,9 @@ public class ReviewService : IReviewService
 
     public async Task<ReviewSummaryDto> GetSummaryAsync(string caseId, CancellationToken ct = default)
     {
+        if (await IsHiddenAsync(caseId)) return ReviewRules.Summarize([]);
         var reviews = await _db.Reviews
-            .Find(Builders<CaseReview>.Filter.Eq(r => r.CaseId, caseId))
+            .Find(VisibleFilter(caseId))
             .ToListAsync(ct);
         return ReviewRules.Summarize(reviews);
     }
@@ -106,6 +127,10 @@ public class ReviewService : IReviewService
         var result = await _db.Reviews.DeleteOneAsync(PairFilter(caseId, userId), ct);
         return result.DeletedCount > 0;
     }
+
+    /// <summary>What players may read of a case. Older reviews have no Hidden field, which counts as not hidden.</summary>
+    private static FilterDefinition<CaseReview> VisibleFilter(string caseId) =>
+        Builders<CaseReview>.Filter.Eq(r => r.CaseId, caseId) & Builders<CaseReview>.Filter.Ne(r => r.Hidden, true);
 
     private static FilterDefinition<CaseReview> PairFilter(string caseId, string userId) =>
         Builders<CaseReview>.Filter.And(

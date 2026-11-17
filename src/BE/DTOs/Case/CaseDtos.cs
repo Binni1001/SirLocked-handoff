@@ -25,7 +25,21 @@ public class CaseSummaryResponse
     public int ItemCount { get; set; }
     public int ClueCount { get; set; }
     public int DialogueCount { get; set; }
+    /// <summary>True when every scene renders in pixel mode (see <c>CaseCatalogRules.IsPixel</c>).</summary>
+    public bool IsPixel { get; set; }
+    /// <summary>False when the case is hidden from players (a draft, or not a pixel case while the catalogue is pixel-only). Set on the admin list.</summary>
+    public bool PlayerVisible { get; set; } = true;
     public DateTime UpdatedAt { get; set; }
+    /// <summary>Non-blocking validation findings of an import or publish (for example missing hint levels on an existing case). Absent elsewhere.</summary>
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public List<CaseValidationError>? ValidationWarnings { get; set; }
+
+    public CaseSummaryResponse WithPlayerVisible(bool visible)
+    {
+        var copy = (CaseSummaryResponse)MemberwiseClone();
+        copy.PlayerVisible = visible;
+        return copy;
+    }
 
     public static CaseSummaryResponse From(GameCase c) => new()
     {
@@ -49,6 +63,7 @@ public class CaseSummaryResponse
         ItemCount = c.Items.Count,
         ClueCount = c.Clues.Count,
         DialogueCount = c.Dialogues.Count,
+        IsPixel = SirLocked.Api.Services.CaseCatalogRules.IsPixel(c),
         UpdatedAt = c.UpdatedAt
     };
 }
@@ -83,6 +98,7 @@ public class CasePublicDetailResponse : CaseSummaryResponse
             ItemCount = summary.ItemCount,
             ClueCount = summary.ClueCount,
             DialogueCount = summary.DialogueCount,
+            IsPixel = summary.IsPixel,
             UpdatedAt = summary.UpdatedAt,
             Characters = c.Characters.Select(CaseCharacterDto.From).ToList()
         };
@@ -97,9 +113,16 @@ public class CaseCharacterDto
     public string Role { get; set; } = string.Empty;
     public string ImageUrl { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
+    /// <summary>Optional speech blip; absent on cases that predate it.</summary>
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public CharacterVoice? Voice { get; set; }
 
     public static CaseCharacterDto From(CaseCharacter c) => new()
     {
+        Voice = c.Voice?.Blip is not { } blip ? null : new CharacterVoice
+        {
+            Blip = new VoiceBlip { Pitch = blip.Pitch, Speed = blip.Speed, Wave = blip.Wave, Variance = blip.Variance }
+        },
         Presentation = c.Presentation?.SpriteSheet is not { } sheet ? null : new()
         {
             SpriteSheet = new()
@@ -123,10 +146,14 @@ public class CaseJsonRequest
     public JsonElement CaseJson { get; set; }
     /// <summary>When true, import overwrites an existing case with the same caseId.</summary>
     public bool Overwrite { get; set; }
+    /// <summary>Keep server-owned AI metadata (preset, contract versions, review stamps). Ignored in Production.</summary>
+    public bool PreserveServerMetadata { get; set; }
 }
 
 public class CaseValidationResponse
 {
     public bool IsValid { get; set; }
     public List<CaseValidationError> Errors { get; set; } = new();
+    /// <summary>Non-blocking findings, such as missing hint levels on a case that already existed.</summary>
+    public List<CaseValidationError> Warnings { get; set; } = new();
 }
