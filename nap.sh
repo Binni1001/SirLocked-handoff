@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Nap phan code cua minh vao repo cuoi ky, mot luot duy nhat.
+# Nap phan code cua minh vao repo cuoi ky, dot cap nhat update-01.
 # Cach dung (chay trong ban clone cua tranhuuanhkhoa/SirLocked):
 #   bash /duong/toi/SirLocked-handoff/nap.sh <kiet|cau|hoang|khoa>
 # Them --push de day nhanh len GitHub ngay sau khi kiem tra xong.
@@ -23,11 +23,11 @@ IDX=-1
 for i in "${!ORDER[@]}"; do [[ "${ORDER[$i]}" == "$WHO" ]] && IDX=$i; done
 (( IDX >= 0 )) || { echo "Ten phai la mot trong: ${ORDER[*]}"; exit 1; }
 
-SLICE="final-$((IDX + 1))-${WHO}"
+SLICE="update-01-$((IDX + 1))-${WHO}"
 # develop hien tai cua repo cuoi ky da co phan ngay 1 cua Kiet (PR #33) = nhanh day-01-1-kiet.
-if (( IDX > 0 )); then PREV="final-${IDX}-${ORDER[$((IDX - 1))]}"; else PREV="day-01-1-kiet"; fi
-BRANCH="feature/phase3-final-${WHO}-${SLUG[$WHO]}"
-MSG="phase3-final(${WHO}): ${TITLE[$WHO]}"
+if (( IDX > 0 )); then PREV="update-01-${IDX}-${ORDER[$((IDX - 1))]}"; else PREV="day-01-1-kiet"; fi
+BRANCH="feature/phase3-update-01-${WHO}-${SLUG[$WHO]}"
+MSG="phase3-update-01(${WHO}): ${TITLE[$WHO]}"
 
 git rev-parse --show-toplevel >/dev/null
 # Repo co duong dan file dai (tai nguyen ai-generated); Windows can bat longpaths.

@@ -1,4 +1,4 @@
-# Nap phan code cua minh vao repo cuoi ky (Windows PowerShell), mot luot duy nhat.
+# Nap phan code cua minh vao repo cuoi ky (Windows PowerShell), dot cap nhat update-01.
 # Cach dung (chay trong ban clone cua tranhuuanhkhoa/SirLocked):
 #   powershell -ExecutionPolicy Bypass -File D:\duong\toi\SirLocked-handoff\nap.ps1 -Ten kiet
 # Them -Push de day nhanh len GitHub ngay sau khi kiem tra xong.
@@ -34,11 +34,11 @@ function GitOut {
 }
 
 $Idx = [array]::IndexOf($Order, $Ten)
-$Slice = "final-$($Idx + 1)-$Ten"
+$Slice = "update-01-$($Idx + 1)-$Ten"
 # develop hien tai cua repo cuoi ky da co phan ngay 1 cua Kiet (PR #33) = nhanh day-01-1-kiet.
-if ($Idx -gt 0) { $Prev = "final-$Idx-$($Order[$Idx - 1])" } else { $Prev = 'day-01-1-kiet' }
-$Branch = "feature/phase3-final-$Ten-$($Slug[$Ten])"
-$Msg = "phase3-final($Ten): $($Title[$Ten])"
+if ($Idx -gt 0) { $Prev = "update-01-$Idx-$($Order[$Idx - 1])" } else { $Prev = 'day-01-1-kiet' }
+$Branch = "feature/phase3-update-01-$Ten-$($Slug[$Ten])"
+$Msg = "phase3-update-01($Ten): $($Title[$Ten])"
 
 # Repo co duong dan file dai (tai nguyen ai-generated); Windows can bat longpaths.
 Invoke-Git config core.longpaths true
