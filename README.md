@@ -1,77 +1,55 @@
-# SirLocked: nạp code vào repo cuối kỳ (phase 3)
+# SirLocked: nạp code vào repo cuối kỳ (phase 3, một lượt)
 
-Repo này chỉ dùng để chuyển code. Nó chứa sẵn **12 phần code** (3 ngày × 4 người). Mỗi người lần lượt đưa phần của mình vào repo cuối kỳ [`tranhuuanhkhoa/SirLocked`](https://github.com/tranhuuanhkhoa/SirLocked), commit bằng tài khoản của mình, mở PR vào `develop` rồi **tự merge PR đó**. **Khoa** làm cuối mỗi ngày, merge phần của mình rồi merge `develop` vào `main`.
+Repo này chỉ dùng để chuyển code. Lần này nạp **một lượt duy nhất**, chia thành **4 phần** theo thứ tự **Kiệt → Cầu → Hoàng → Khoa**. Mỗi người đưa phần của mình vào repo cuối kỳ [`tranhuuanhkhoa/SirLocked`](https://github.com/tranhuuanhkhoa/SirLocked), commit bằng tài khoản của mình, mở PR vào `develop` rồi **tự merge PR đó**. **Khoa** làm cuối cùng: merge phần của mình rồi merge `develop` vào `main`.
 
-- **Gốc:** `develop` hiện tại của repo cuối kỳ (PR #32, 14/10/2026). Repo này giữ bản đó ở nhánh `base`.
-- **Đích:** sau phần cuối cùng, `develop` giống hệt bản đầy đủ mới nhất (nhánh làm việc `feat/claude-vu-an`, 17/11/2026), không thừa không thiếu một file.
-- Các phần có khối lượng gần bằng nhau, khoảng 15–21 nghìn dòng mỗi phần.
+- **Gốc:** `develop` hiện tại của repo cuối kỳ, đã có phần ngày 1 của Kiệt ([PR #33](https://github.com/tranhuuanhkhoa/SirLocked/pull/33)). Repo này giữ bản đó ở nhánh `day-01-1-kiet`.
+- **Đích:** sau phần của Khoa, `develop` giống hệt bản gộp mới nhất của nhóm (`gop/tong-hop-2026-11-19`, commit `34eaad9d`, 19/11/2026), trừ 2 tài liệu chứa địa chỉ VPS và SSH. Hai tài liệu đó không đưa lên repo cuối kỳ (repo này để công khai). Các script `scripts/deploy-server.sh` và `scripts/set-*.sh` vẫn có, nhưng không còn địa chỉ server mặc định: khi chạy phải tự đặt `SERVER=<user>@<địa-chỉ>` và `PORT=<cổng-ssh>`.
+- Các phần ngày 2 và ngày 3 trước đây (`day-02-*`, `day-03-*`) **không dùng nữa**.
 
-## Lịch nạp
+## 4 phần
 
-Thứ tự mỗi ngày: **Kiệt → Cầu → Hoàng → Khoa**. Người sau chỉ bắt đầu khi người trước **đã tự merge PR của mình** vào `develop`.
+| # | Người | Nội dung | Nhánh tạo trong repo cuối kỳ | File | Dòng (+/−) |
+|---|---|---|---|---|---|
+| 1 | Kiệt | Web người chơi: trang, game, giao diện, ảnh; báo cáo phân tích | `feature/phase3-final-kiet-player-web-app` | 550 | +55.434 / −4.127 |
+| 2 | Cầu | Backend (service, model, API), trang admin, bản thiết kế tính năng | `feature/phase3-final-cau-backend-admin` | 443 | +56.006 / −5.602 |
+| 3 | Hoàng | Toàn bộ test tự động (unit, integration, giao diện) và script chạy | `feature/phase3-final-hoang-tests-scripts` | 247 | +58.258 / −1.473 |
+| 4 | Khoa | Studio AI, công cụ, dữ liệu vụ án, tài liệu | `feature/phase3-final-khoa-ai-studio-tools-docs` | 417 | +58.678 / −165 |
 
-Tiến độ:
-- Ngày 1, Kiệt: đã xong ([PR #33](https://github.com/tranhuuanhkhoa/SirLocked/pull/33)).
-
-### Ngày 1 (17/11/2026): foundation, case board UI and economy
-| # | Người | Nhánh tạo trong repo cuối kỳ | File | Dòng (+/−) |
-|---|---|---|---|---|
-| 1 | Kiệt | `feature/phase3-day-01-kiet-foundation-ui-economy` | 85 | +15.928 / −690 |
-| 2 | Cầu | `feature/phase3-day-01-cau-foundation-ui-economy` | 81 | +16.624 / −90 |
-| 3 | Hoàng | `feature/phase3-day-01-hoang-foundation-ui-economy` | 71 | +18.455 / −168 |
-| 4 | Khoa | `feature/phase3-day-01-khoa-foundation-ui-economy` | 67 | +16.900 / −187 |
-
-### Ngày 2 (18/11/2026): gameplay, puzzles, cutscenes and audio
-| # | Người | Nhánh | File | Dòng (+/−) |
-|---|---|---|---|---|
-| 1 | Kiệt | `feature/phase3-day-02-kiet-gameplay-puzzles-cutscenes-audio` | 120 | +19.098 / −166 |
-| 2 | Cầu | `feature/phase3-day-02-cau-gameplay-puzzles-cutscenes-audio` | 92 | +17.111 / −2.307 |
-| 3 | Hoàng | `feature/phase3-day-02-hoang-gameplay-puzzles-cutscenes-audio` | 200 | +15.273 / −750 |
-| 4 | Khoa | `feature/phase3-day-02-khoa-gameplay-puzzles-cutscenes-audio` | 212 | +14.789 / −933 |
-
-### Ngày 3 (19/11/2026): admin, payments, AI studio and pixel cases
-| # | Người | Nhánh | File | Dòng (+/−) |
-|---|---|---|---|---|
-| 1 | Kiệt | `feature/phase3-day-03-kiet-admin-payments-ai-studio-pixel-cases` | 90 | +17.938 / −1.832 |
-| 2 | Cầu | `feature/phase3-day-03-cau-admin-payments-ai-studio-pixel-cases` | 92 | +21.120 / −653 |
-| 3 | Hoàng | `feature/phase3-day-03-hoang-admin-payments-ai-studio-pixel-cases` | 275 | +11.957 / −3.215 |
-| 4 | Khoa | `feature/phase3-day-03-khoa-admin-payments-ai-studio-pixel-cases` | 97 | +19.086 / −535 |
-
-Danh sách file của từng phần (A = thêm, M = sửa, D = xóa) nằm trong thư mục [`danh-sach/`](danh-sach/). Có thể dùng danh sách này khi viết `CHANGELOG.md` cá nhân.
+Mỗi phần khoảng 59–62 nghìn dòng thay đổi. Danh sách file của từng phần (A = thêm, M = sửa, D = xóa) nằm trong [`danh-sach/final-*.txt`](danh-sach/), có thể dùng khi viết `CHANGELOG.md` cá nhân.
 
 ## Chuẩn bị (mỗi người làm một lần)
 
-1. Chấp nhận lời mời vào repo này. Repo để riêng tư, Kiệt sẽ mời qua email GitHub.
-2. Bật đường dẫn dài **trước khi clone**. Repo có file nằm rất sâu, và Windows sẽ báo `Filename too long` nếu thiếu bước này:
+1. Bật đường dẫn dài **trước khi clone**. Repo có file nằm rất sâu, và Windows sẽ báo `Filename too long` nếu thiếu bước này:
    ```bash
    git config --global core.longpaths true
    ```
-3. Kiểm tra tên và email git là của chính mình, vì commit sẽ đứng tên theo đó:
+2. Kiểm tra tên và email git là của chính mình, vì commit sẽ đứng tên theo đó:
    ```bash
    git config --global user.name
    git config --global user.email
    ```
-4. Clone hai repo, đặt ở thư mục có đường dẫn ngắn (ví dụ `D:\sl`):
+3. Clone hai repo, đặt ở thư mục có đường dẫn ngắn (ví dụ `D:\sl`). Ai đã clone từ lần trước thì chỉ cần `git pull` trong thư mục `SirLocked-handoff`.
    ```bash
    git clone https://github.com/tranhuuanhkhoa/SirLocked.git
    git clone --single-branch -b main https://github.com/Binni1001/SirLocked-handoff.git
    ```
-   Repo handoff chỉ cần nhánh `main` (script và hướng dẫn). Code từng phần sẽ được script tự tải về.
 
 ## Đến lượt mình: 3 bước
 
-**Bước 1: chạy script** trong thư mục `SirLocked` (repo cuối kỳ). Thay số ngày và tên cho đúng lượt của mình.
+Người sau chỉ bắt đầu khi người trước **đã tự merge PR của mình** vào `develop`.
+
+**Bước 1: chạy script** trong thư mục `SirLocked` (repo cuối kỳ), thay `kiet` bằng tên mình.
 
 PowerShell:
 ```powershell
 cd D:\sl\SirLocked
-powershell -ExecutionPolicy Bypass -File ..\SirLocked-handoff\nap.ps1 -Ngay 1 -Ten kiet -Push
+powershell -ExecutionPolicy Bypass -File ..\SirLocked-handoff\nap.ps1 -Ten kiet -Push
 ```
 
 Git Bash:
 ```bash
 cd /d/sl/SirLocked
-bash ../SirLocked-handoff/nap.sh 1 kiet --push
+bash ../SirLocked-handoff/nap.sh kiet --push
 ```
 
 Script tự làm những việc sau:
@@ -79,45 +57,43 @@ Script tự làm những việc sau:
 2. Kiểm tra `develop` đã có đủ phần của người trước. Nếu chưa, script dừng lại.
 3. Tạo nhánh đúng tên.
 4. Đưa đúng phần code của mình vào, kể cả các file cần xóa.
-5. Commit với message `phase3-day-0X(<ten>): <chu de>`.
+5. Commit với message `phase3-final(<ten>): <noi dung>`.
 6. Kiểm tra lại kết quả khớp từng file.
 7. Đẩy nhánh lên GitHub.
 
 Nếu muốn xem trước khi đẩy, bỏ `-Push` / `--push`. Script sẽ in sẵn lệnh `git push` để chạy sau.
 
-**Bước 2: mở PR.** Script in ra link dạng `https://github.com/tranhuuanhkhoa/SirLocked/compare/develop...<nhanh>?expand=1`. Base là `develop`, tiêu đề giữ nguyên message commit.
-
-Nếu máy có [GitHub CLI](https://cli.github.com/), có thể mở PR bằng lệnh (thay `<nhanh>` bằng tên nhánh script vừa in):
+**Bước 2: mở PR.** Script in ra link dạng `https://github.com/tranhuuanhkhoa/SirLocked/compare/develop...<nhanh>?expand=1`. Base là `develop`, tiêu đề giữ nguyên message commit. Với GitHub CLI:
 ```bash
 gh pr create --repo tranhuuanhkhoa/SirLocked --base develop --head <nhanh> --fill
 ```
 
-**Bước 3: tự merge PR của mình.** Trên trang PR, bấm **Merge pull request** và chọn **Create a merge commit**. Không chọn Squash hay Rebase. Nếu dùng GitHub CLI:
+**Bước 3: tự merge PR của mình.** Trên trang PR, bấm **Merge pull request** và chọn **Create a merge commit**. Không chọn Squash hay Rebase. Với GitHub CLI:
 ```bash
 gh pr merge <so-PR> --repo tranhuuanhkhoa/SirLocked --merge
 ```
 Merge xong thì **báo người tiếp theo** trong nhóm.
 
-- **CI có thể đỏ ở các PR giữa chừng.** Code đầy đủ được chia nhỏ theo file, nên khi mới có một phần thì backend hoặc frontend có thể chưa build được. Cứ merge theo thứ tự. Sau phần cuối ngày 3, `develop` có đủ code và CI phải xanh trở lại.
-- Không sửa thêm gì trên `develop` trong 3 ngày này. Nếu sửa, script của người sau sẽ báo "develop chưa khớp".
+- **CI có thể đỏ ở các PR giữa chừng.** Code được chia theo mảng, nên khi mới có một phần thì backend hoặc frontend có thể chưa build được. Cứ merge theo thứ tự. Sau phần của Khoa, `develop` có đủ code.
+- Không sửa thêm gì trên `develop` trong lúc nạp. Nếu sửa, script của người sau sẽ báo "develop chưa khớp".
 
 ## Việc riêng của Khoa: đưa `develop` vào `main`
 
-Khoa là người cuối mỗi ngày. Sau khi tự merge PR của mình vào `develop`:
+Sau khi tự merge PR của mình vào `develop`:
 
-1. **Kiểm tra `develop` đã đủ 4 phần của ngày.** Chạy trong thư mục `SirLocked`, thay `day-01-4-khoa` bằng `day-02-4-khoa` hoặc `day-03-4-khoa` cho ngày 2 và ngày 3:
+1. **Kiểm tra `develop` đã đủ 4 phần.** Chạy trong thư mục `SirLocked`:
    ```bash
    git fetch origin develop
-   git fetch handoff day-01-4-khoa
-   git diff --stat origin/develop handoff/day-01-4-khoa
+   git fetch handoff final-4-khoa
+   git diff --stat origin/develop handoff/final-4-khoa
    ```
    Lệnh **không in ra gì** nghĩa là đủ. Nếu lệnh liệt kê file thì còn PR của ai đó chưa merge: **dừng lại, chưa merge vào `main`**.
-2. Mở PR từ `develop` vào `main`, tiêu đề ví dụ `phase3-day-01: merge develop into main`, rồi merge bằng **Create a merge commit**. Với GitHub CLI:
+2. Mở PR từ `develop` vào `main`, rồi merge bằng **Create a merge commit**:
    ```bash
-   gh pr create --repo tranhuuanhkhoa/SirLocked --base main --head develop --title "phase3-day-01: merge develop into main" --body "Ngay 1 phase 3: du 4 phan Kiet, Cau, Hoang, Khoa."
+   gh pr create --repo tranhuuanhkhoa/SirLocked --base main --head develop --title "phase3-final: merge develop into main" --body "Phase 3: du 4 phan Kiet, Cau, Hoang, Khoa."
    gh pr merge <so-PR> --repo tranhuuanhkhoa/SirLocked --merge
    ```
-3. Báo nhóm ngày đó đã xong.
+3. Báo nhóm đã xong.
 
 ## Khi gặp lỗi
 
@@ -127,12 +103,12 @@ Khoa là người cuối mỗi ngày. Sau khi tự merge PR của mình vào `de
 | `Thu muc dang co thay doi chua commit` | Repo trên máy đang có file sửa dở | Commit, hoặc bỏ thay đổi đó (`git stash push -m tam`), rồi chạy lại |
 | `Filename too long` | Chưa bật longpaths | Chạy `git config --global core.longpaths true`, xóa thư mục clone rồi clone lại |
 | `fatal: a branch named ... already exists` | Đã chạy script cho lượt này rồi | Nếu chưa push: `git checkout develop` rồi `git branch -D <nhanh>` và chạy lại. Nếu đã push: chỉ cần mở PR |
-| `Repository not found` khi tải handoff | Chưa chấp nhận lời mời vào repo này | Kiểm tra email GitHub |
 
 ## Các nhánh trong repo này
 
 - `main`: hướng dẫn này, `nap.ps1`, `nap.sh`, `danh-sach/`.
-- `base`: `develop` của repo cuối kỳ trước khi nạp (PR #32).
-- `day-0X-N-<ten>`: trạng thái đầy đủ của repo **sau** phần thứ N trong ngày X. Mỗi nhánh nối tiếp nhánh trước. Nhánh cuối `day-03-4-khoa` giống hệt bản đầy đủ.
+- `day-01-1-kiet`: `develop` hiện tại của repo cuối kỳ (gốc của lượt này).
+- `final-N-<ten>`: trạng thái đầy đủ của repo **sau** phần thứ N. Mỗi nhánh nối tiếp nhánh trước. Nhánh cuối `final-4-khoa` là bản đích.
+- `base`, `day-01-*` còn lại, `day-02-*`, `day-03-*`: của kế hoạch 3 ngày cũ, giữ để tra cứu.
 
-Toàn bộ 12 lượt đã được chạy thử trên bản sao của repo cuối kỳ: script tạo đúng nhánh và commit, chặn lượt chạy sai thứ tự, và sau lượt cuối `develop` khớp hoàn toàn bản đầy đủ.
+Cả 4 lượt đã được chạy thử trên bản sao của repo cuối kỳ (Git Bash và PowerShell): script tạo đúng nhánh và commit, chặn lượt chạy sai thứ tự, và sau lượt của Khoa `develop` khớp hoàn toàn bản đích.

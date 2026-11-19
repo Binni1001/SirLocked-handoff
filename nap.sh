@@ -1,43 +1,33 @@
 #!/usr/bin/env bash
-# Nap mot phan code vao repo cuoi ky.
+# Nap phan code cua minh vao repo cuoi ky, mot luot duy nhat.
 # Cach dung (chay trong ban clone cua tranhuuanhkhoa/SirLocked):
-#   bash /duong/toi/SirLocked-handoff/nap.sh <ngay 1|2|3> <kiet|cau|hoang|khoa>
+#   bash /duong/toi/SirLocked-handoff/nap.sh <kiet|cau|hoang|khoa>
 # Them --push de day nhanh len GitHub ngay sau khi kiem tra xong.
 set -euo pipefail
 
-HANDOFF_URL="https://github.com/Binni1001/SirLocked-handoff.git"
+HANDOFF_URL="${SIRLOCKED_HANDOFF_URL:-https://github.com/Binni1001/SirLocked-handoff.git}"
 FINAL_REPO="tranhuuanhkhoa/SirLocked"
 ORDER=(kiet cau hoang khoa)
-declare -A SLUG=(
-  [1]="foundation-ui-economy"
-  [2]="gameplay-puzzles-cutscenes-audio"
-  [3]="admin-payments-ai-studio-pixel-cases"
-)
+declare -A SLUG=([kiet]="player-web-app" [cau]="backend-admin" [hoang]="tests-scripts" [khoa]="ai-studio-tools-docs")
 declare -A TITLE=(
-  [1]="foundation, case board UI and economy"
-  [2]="gameplay, puzzles, cutscenes and audio"
-  [3]="admin, payments, AI studio and pixel cases"
+  [kiet]="player web app: pages, game, styles and assets"
+  [cau]="backend services, admin pages and feature specs"
+  [hoang]="automated tests and run scripts"
+  [khoa]="AI studio, tools, case data and documents"
 )
 
-DAY="${1:?Thieu ngay (1, 2 hoac 3)}"
-WHO="${2:?Thieu ten (kiet, cau, hoang, khoa)}"
-PUSH="${3:-}"
-[[ -n "${SLUG[$DAY]:-}" ]] || { echo "Ngay phai la 1, 2 hoac 3"; exit 1; }
+WHO="${1:?Thieu ten (kiet, cau, hoang, khoa)}"
+PUSH="${2:-}"
 
 IDX=-1
 for i in "${!ORDER[@]}"; do [[ "${ORDER[$i]}" == "$WHO" ]] && IDX=$i; done
 (( IDX >= 0 )) || { echo "Ten phai la mot trong: ${ORDER[*]}"; exit 1; }
 
-SLICE="day-0${DAY}-$((IDX + 1))-${WHO}"
-if (( IDX > 0 )); then
-  PREV="day-0${DAY}-${IDX}-${ORDER[$((IDX - 1))]}"
-elif (( DAY > 1 )); then
-  PREV="day-0$((DAY - 1))-4-khoa"
-else
-  PREV="base"
-fi
-BRANCH="feature/phase3-day-0${DAY}-${WHO}-${SLUG[$DAY]}"
-MSG="phase3-day-0${DAY}(${WHO}): ${TITLE[$DAY]}"
+SLICE="final-$((IDX + 1))-${WHO}"
+# develop hien tai cua repo cuoi ky da co phan ngay 1 cua Kiet (PR #33) = nhanh day-01-1-kiet.
+if (( IDX > 0 )); then PREV="final-${IDX}-${ORDER[$((IDX - 1))]}"; else PREV="day-01-1-kiet"; fi
+BRANCH="feature/phase3-final-${WHO}-${SLUG[$WHO]}"
+MSG="phase3-final(${WHO}): ${TITLE[$WHO]}"
 
 git rev-parse --show-toplevel >/dev/null
 # Repo co duong dan file dai (tai nguyen ai-generated); Windows can bat longpaths.

@@ -1,44 +1,50 @@
-# Nap mot phan code vao repo cuoi ky (Windows PowerShell).
+# Nap phan code cua minh vao repo cuoi ky (Windows PowerShell), mot luot duy nhat.
 # Cach dung (chay trong ban clone cua tranhuuanhkhoa/SirLocked):
-#   powershell -ExecutionPolicy Bypass -File D:\duong\toi\SirLocked-handoff\nap.ps1 -Ngay 1 -Ten kiet
+#   powershell -ExecutionPolicy Bypass -File D:\duong\toi\SirLocked-handoff\nap.ps1 -Ten kiet
 # Them -Push de day nhanh len GitHub ngay sau khi kiem tra xong.
 param(
-  [Parameter(Mandatory = $true)][ValidateSet(1, 2, 3)][int]$Ngay,
   [Parameter(Mandatory = $true)][ValidateSet('kiet', 'cau', 'hoang', 'khoa')][string]$Ten,
   [switch]$Push
 )
 $ErrorActionPreference = 'Stop'
 
-$HandoffUrl = 'https://github.com/Binni1001/SirLocked-handoff.git'
+$HandoffUrl = if ($env:SIRLOCKED_HANDOFF_URL) { $env:SIRLOCKED_HANDOFF_URL } else { 'https://github.com/Binni1001/SirLocked-handoff.git' }
 $FinalRepo = 'tranhuuanhkhoa/SirLocked'
 $Order = @('kiet', 'cau', 'hoang', 'khoa')
-$Slug = @{ 1 = 'foundation-ui-economy'; 2 = 'gameplay-puzzles-cutscenes-audio'; 3 = 'admin-payments-ai-studio-pixel-cases' }
-$Title = @{ 1 = 'foundation, case board UI and economy'; 2 = 'gameplay, puzzles, cutscenes and audio'; 3 = 'admin, payments, AI studio and pixel cases' }
+$Slug = @{ kiet = 'player-web-app'; cau = 'backend-admin'; hoang = 'tests-scripts'; khoa = 'ai-studio-tools-docs' }
+$Title = @{
+  kiet = 'player web app: pages, game, styles and assets'
+  cau = 'backend services, admin pages and feature specs'
+  hoang = 'automated tests and run scripts'
+  khoa = 'AI studio, tools, case data and documents'
+}
 
+# git in tien do va canh bao ra stderr; Windows PowerShell coi do la loi neu de 'Stop'.
+# Vi vay chi dua vao ma thoat cua git.
 function Invoke-Git {
-  & git.exe @args
+  $ErrorActionPreference = 'Continue'
+  & git.exe @args 2>&1 | ForEach-Object { "$_" }
   if ($LASTEXITCODE -ne 0) { throw "Lenh git that bai: git $args" }
 }
 function GitOut {
-  $out = & git.exe @args
+  $ErrorActionPreference = 'Continue'
+  $out = & git.exe @args 2>$null
   if ($LASTEXITCODE -ne 0) { throw "Lenh git that bai: git $args" }
   return ($out -join "`n").Trim()
 }
 
 $Idx = [array]::IndexOf($Order, $Ten)
-$Slice = "day-0$Ngay-$($Idx + 1)-$Ten"
-if ($Idx -gt 0) { $Prev = "day-0$Ngay-$Idx-$($Order[$Idx - 1])" }
-elseif ($Ngay -gt 1) { $Prev = "day-0$($Ngay - 1)-4-khoa" }
-else { $Prev = 'base' }
-$Branch = "feature/phase3-day-0$Ngay-$Ten-$($Slug[$Ngay])"
-$Msg = "phase3-day-0$Ngay($Ten): $($Title[$Ngay])"
+$Slice = "final-$($Idx + 1)-$Ten"
+# develop hien tai cua repo cuoi ky da co phan ngay 1 cua Kiet (PR #33) = nhanh day-01-1-kiet.
+if ($Idx -gt 0) { $Prev = "final-$Idx-$($Order[$Idx - 1])" } else { $Prev = 'day-01-1-kiet' }
+$Branch = "feature/phase3-final-$Ten-$($Slug[$Ten])"
+$Msg = "phase3-final($Ten): $($Title[$Ten])"
 
 # Repo co duong dan file dai (tai nguyen ai-generated); Windows can bat longpaths.
 Invoke-Git config core.longpaths true
 if (GitOut status --porcelain) { throw 'Thu muc dang co thay doi chua commit. Commit hoac bo di truoc.' }
 
-& git.exe remote get-url handoff *> $null
-if ($LASTEXITCODE -ne 0) { Invoke-Git remote add handoff $HandoffUrl }
+if (@(GitOut remote) -split "`n" -notcontains 'handoff') { Invoke-Git remote add handoff $HandoffUrl }
 
 Write-Host '== Lay code moi nhat'
 Invoke-Git fetch origin
