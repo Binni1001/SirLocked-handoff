@@ -8,7 +8,7 @@ Repo này chỉ dùng để chuyển code. Lần này nạp **một lượt duy 
 
 ## Tiến độ
 
-- Phần 1, Kiệt: đã mở [PR #34](https://github.com/tranhuuanhkhoa/SirLocked/pull/34).
+- Phần 1, Kiệt: đã xong ([PR #34](https://github.com/tranhuuanhkhoa/SirLocked/pull/34), merge 19/11). Tiếp theo: **Cầu**.
 
 ## 4 phần
 
