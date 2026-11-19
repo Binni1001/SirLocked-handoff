@@ -8,7 +8,7 @@ Repo này chỉ dùng để chuyển code. Đợt này tên là **update-01**: n
 
 ## Tiến độ
 
-- Chưa ai nạp. Bắt đầu từ **Kiệt**.
+- Phần 1, Kiệt: đã mở [PR #35](https://github.com/tranhuuanhkhoa/SirLocked/pull/35), chờ merge.
 
 ## 4 phần
 
