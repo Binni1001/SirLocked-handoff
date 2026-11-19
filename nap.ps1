@@ -69,7 +69,15 @@ if ((GitOut rev-parse 'HEAD^{tree}') -ne (GitOut rev-parse "handoff/$Slice^{tree
 Invoke-Git show --stat --format='%h %an <%ae>' HEAD | Select-Object -Last 1
 Write-Host "OK: nhanh $Branch khop dung phan $Slice."
 
-if ($Push) { Invoke-Git push -u origin $Branch }
+if ($Push) {
+  # Chay git push truc tiep (khong chuyen huong) de trinh dang nhap GitHub hien len duoc.
+  $ErrorActionPreference = 'Continue'
+  & git.exe push -u origin $Branch
+  if ($LASTEXITCODE -ne 0) {
+    Write-Host "Push chua thanh cong. Chay lai lenh nay: git push -u origin $Branch"
+    exit 1
+  }
+}
 else { Write-Host "Kiem tra xong thi day len: git push -u origin $Branch" }
 Write-Host "Mo PR vao develop: https://github.com/$FinalRepo/compare/develop...$($Branch)?expand=1"
 Write-Host "Sau do tu merge PR (Create a merge commit) va bao nguoi tiep theo."

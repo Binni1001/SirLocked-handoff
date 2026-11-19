@@ -6,6 +6,10 @@ Repo này chỉ dùng để chuyển code. Lần này nạp **một lượt duy 
 - **Đích:** sau phần của Khoa, `develop` giống hệt bản gộp mới nhất của nhóm (`gop/tong-hop-2026-11-19`, commit `34eaad9d`, 19/11/2026), trừ 2 tài liệu chứa địa chỉ VPS và SSH. Hai tài liệu đó không đưa lên repo cuối kỳ (repo này để công khai). Các script `scripts/deploy-server.sh` và `scripts/set-*.sh` vẫn có, nhưng không còn địa chỉ server mặc định: khi chạy phải tự đặt `SERVER=<user>@<địa-chỉ>` và `PORT=<cổng-ssh>`.
 - Các phần ngày 2 và ngày 3 trước đây (`day-02-*`, `day-03-*`) **không dùng nữa**.
 
+## Tiến độ
+
+- Phần 1, Kiệt: đã mở [PR #34](https://github.com/tranhuuanhkhoa/SirLocked/pull/34).
+
 ## 4 phần
 
 | # | Người | Nội dung | Nhánh tạo trong repo cuối kỳ | File | Dòng (+/−) |
@@ -102,6 +106,7 @@ Sau khi tự merge PR của mình vào `develop`:
 | `DUNG LAI: develop chua khop voi phan truoc` | Người trước chưa merge PR của mình, hoặc ai đó đã sửa `develop` | Nhắc người trước merge rồi chạy lại. Nếu đã merge rồi mà vẫn lỗi, báo Kiệt |
 | `Thu muc dang co thay doi chua commit` | Repo trên máy đang có file sửa dở | Commit, hoặc bỏ thay đổi đó (`git stash push -m tam`), rồi chạy lại |
 | `Filename too long` | Chưa bật longpaths | Chạy `git config --global core.longpaths true`, xóa thư mục clone rồi clone lại |
+| `Push chua thanh cong` | Đăng nhập GitHub hoặc mạng bị lỗi lúc đẩy | Chạy lại đúng lệnh `git push -u origin <nhanh>` script in ra, rồi mở PR |
 | `fatal: a branch named ... already exists` | Đã chạy script cho lượt này rồi | Nếu chưa push: `git checkout develop` rồi `git branch -D <nhanh>` và chạy lại. Nếu đã push: chỉ cần mở PR |
 
 ## Các nhánh trong repo này
